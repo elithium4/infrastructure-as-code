@@ -12,23 +12,6 @@
       apt:
         update_cache: true
         cache_valid_time: 3600
-
-    - name: Check if docker is active
-      service:
-        name: docker
-        state: started
-        enabled: yes
-
-    - name: Ensure group "docker" exists
-      group:
-        name: docker
-        state: present
-
-    - name: Add user to docker group
-      user:
-        name: "{{ ansible_user }}"
-        groups: docker
-        append: yes
     
     - name: Clone repository
       git:
