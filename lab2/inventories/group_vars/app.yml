@@ -1,0 +1,5 @@
+ansible_user: vagrant
+repository_url: https://github.com/mdn/django-locallibrary-tutorial
+repository_dir: django-locallibrary-tutorial
+app_image: timurbabs/django
+app_name: django

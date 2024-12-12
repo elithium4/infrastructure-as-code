@@ -1,0 +1,28 @@
+- name: Install Docker
+  hosts: app
+  roles:
+    - docker
+  vars:
+    ansible_ssh_private_key_file: ".vagrant/machines/{{ inventory_hostname }}/virtualbox/private_key"
+  vars_files:
+    - ./inventories/group_vars/app.yml
+  become: true
+  tasks:
+    - name: Update apt
+      apt:
+        update_cache: true
+        cache_valid_time: 3600
+    
+    - name: Clone repository
+      git:
+        repo: "{{ repository_url }}"
+        dest: /home/{{ ansible_user}}/{{ repository_dir }}
+
+    - name: Start application from repository
+      community.docker.docker_container:
+        image: "{{ app_image }}"
+        ports:
+          - 8000:8000
+        name: "{{ app_name }}"
+        detach: true
+        state: started
