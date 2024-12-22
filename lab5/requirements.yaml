@@ -1,0 +1,5 @@
+roles:
+  - name: postgresql
+    src: https://gitlab.com/ansible-roles5042950/postgresql
+    scm: git
+    version: master
