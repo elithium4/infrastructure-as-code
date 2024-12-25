@@ -1,0 +1,16 @@
+ansible_user: vagrant
+postgresql_data_path: /var/lib/postgresql
+postgresql_conf_path: /etc/postgresql/12/main
+postgresql_custom_data_path: "/home/test"
+postgresql_databases:
+  - users
+postgresql_users:
+  - { name: admin, password: admin }
+postgresql_permissions:
+  - { database: users, user: admin}
+
+postgresql_cluster: true
+
+postgresql_replica_user: { name: replica, password: replica}
+
+postgresql_master_address: 192.168.56.202
