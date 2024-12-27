@@ -1,0 +1,13 @@
+roles:
+  - name: grafana
+    src: https://gitlab.com/ansible-roles5042950/grafana
+    scm: git
+    version: master
+  - name: prometheus
+    src: https://gitlab.com/ansible-roles5042950/prometheus
+    scm: git
+    version: master
+  - name: loki
+    src: https://gitlab.com/ansible-roles5042950/loki
+    scm: git
+    version: master

@@ -1,0 +1,61 @@
+---
+- name: Init monitoring hosts
+  hosts: monitoring
+  become: true
+  roles:
+    - docker
+  vars:
+    ansible_ssh_private_key_file: ".vagrant/machines/{{ inventory_hostname }}/virtualbox/private_key"
+  vars_files:
+    - ./inventories/group_vars/all.yml
+    - ./inventories/group_vars/monitoring.yml
+  roles:
+    - grafana
+    - prometheus
+    - loki
+  tasks:
+    - name: Create dashboards directory
+      file:
+        path: /var/lib/grafana/dashboards
+        state: directory
+        mode: "0750"
+        owner: grafana
+    - name: Copy dasboard
+      copy:
+        src: "{{ inventory_dir }}/files/dashboard.json"
+        dest: /var/lib/grafana/dashboards
+        mode: "0640"
+        owner: grafana
+      notify: Restart grafana
+
+
+- name: Init app hosts
+  hosts: app
+  become: true
+  vars:
+    ansible_ssh_private_key_file: ".vagrant/machines/{{ inventory_hostname }}/virtualbox/private_key"
+  vars_files:
+    - ./inventories/group_vars/all.yml
+    - ./inventories/group_vars/app.yml
+  tasks:
+    - name: Install Java
+      apt:
+        name:
+          - default-jre
+          - gradle
+        state: present
+      
+    - name: Clone app
+      git:
+        repo: "{{ repo_url }}"
+        dest: "{{ app_folder_name }}"
+        
+    - name: Ensure gradlew is executable
+      file:
+        path: "{{ app_folder_name }}/gradlew"
+        mode: '0777'
+      
+    - name: Run java app
+      shell: "nohup ./gradlew :bootRun > app.log 2>&1 &"
+      args:
+        chdir: "{{ app_folder_name }}"
