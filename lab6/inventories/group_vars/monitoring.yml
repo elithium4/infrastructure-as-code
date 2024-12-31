@@ -1,0 +1,85 @@
+notification_emails:
+  - ea.korotkina@yandex.ru
+grafana__smtp_host: localhost:25
+grafana__smtp_user: user
+grafana__smtp_password: password
+grafana__smtp_pfrom_address: from_address
+
+prometheus__config:
+  global:
+    scrape_interval: 5s
+  scrape_configs:
+    - job_name: springboot_demo
+      metrics_path: '/actuator/prometheus'
+      static_configs:
+        - targets:
+            - 192.168.56.201:1235
+
+grafana__provisioning:
+  dashboards:
+    apiVersion: 1
+    providers:
+      - name: "default"
+        orgId: 1
+        folder: ""
+        folderUid: ""
+        type: file
+        options:
+          path: /var/lib/grafana/dashboards
+  datasources:
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        access: proxy
+        url: http://localhost:9090
+        uid: prometheus
+        editable: false
+        jsonData:
+          httpMethod: POST
+          manageAlerts: true
+          prometheusType: Prometheus
+          prometheusVersion: 2.46.0
+          cacheLevel: "Low"
+          disableRecordingRules: false
+          incrementalQueryOverlapWindow: 10m
+      - name: Loki
+        type: loki
+        access: proxy
+        uid: loki
+        orgId: 1
+        url: http://localhost:3100
+        basicAuth: false
+        isDefault: false
+        version: 1
+        editable: false
+  alerting:
+    apiVersion: 1
+    groups:
+      - orgId: 1
+        name: error500
+        folder: alerts
+        interval: 5m
+    contactPoints:
+      - orgId: 1
+        name: Alerting email
+        receivers:
+          - uid: first_uid
+            type: email
+            settings:
+              addresses: "{{ notification_emails  | join(',')}}"
+              singleEmail: false
+              subject: Alert
+
+grafana__config:
+  smtp:
+    enabled: "true"
+    host: "{{ grafana__smtp_host }}"
+    user: "{{ grafana__smtp_user }}"
+    password: "{{ grafana__smtp_password }}"
+    from_address: "{{ grafana__smtp_pfrom_address }}"
+    from_name: Grafana
+    skip_verify: "false"
+  recording_rules:
+    enabled: "false"
+    timeout: "30s"
